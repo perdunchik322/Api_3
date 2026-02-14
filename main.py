@@ -1,16 +1,74 @@
-# This is a sample Python script.
+import sys
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QMainWindow, QApplication
+import requests
+from PyQt6.QtGui import QPixmap
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+MAP_FILE = "map.png"
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(800, 600)
+        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.label_for_map = QtWidgets.QLabel(parent=self.centralwidget)
+        self.label_for_map.setGeometry(QtCore.QRect(0, 0, 66, 18))
+        self.label_for_map.setObjectName("label_for_map")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label_for_map.setText(_translate("MainWindow", "TextLabel"))
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.setObjectName("wtf_pepe")
+        self.setup()
+
+    def setup(self):
+        self.get_image()
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        pixmap = QPixmap('map.png')
+        self.label_for_map.setPixmap(pixmap)
+
+        layout.addWidget(self.label_for_map)
+
+    def get_image(self):
+        api_key = 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
+        lat = 54.7224888
+        lon = 30.457209
+        spn = 0.002
+        params = {
+            "ll": f"{lon},{lat}",
+            "spn": f"{spn},{spn}",
+            "apikey": api_key
+        }
+        server_address = 'https://static-maps.yandex.ru/v1?'
+        response = requests.get(server_address, params=params)
+        with open('map.png', "wb") as file:
+            file.write(response.content)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
