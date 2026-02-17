@@ -42,6 +42,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.z_dif = 1
         self.lat = 54.7224888
         self.lon = 30.457209
+        self.theme = 'dark'
         self.change_coord = 0.0001 * self.z
         self.setup()
 
@@ -58,7 +59,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         params = {
             "ll": f"{self.lon},{self.lat}",
             "z": str(self.z),
-            "apikey": api_key
+            "apikey": api_key,
+            "theme": self.theme
         }
         server_address = 'https://static-maps.yandex.ru/v1?'
         response = requests.get(server_address, params=params)
@@ -83,6 +85,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.lat += step
         elif event.key() == Qt.Key.Key_Down:
             self.lat -= step
+        elif event.key() == Qt.Key.Key_Space:
+            if self.theme == "dark":
+                self.theme = "light"
+            elif self.theme == "light":
+                self.theme = "dark"
 
         self.get_image()
 
