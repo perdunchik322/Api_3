@@ -40,6 +40,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.z = 18
         self.z_dif = 1
+        self.lat = 54.7224888
+        self.lon = 30.457209
+        self.change_coord = 0.0001 * self.z
         self.setup()
 
     def setup(self):
@@ -52,10 +55,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def get_image(self):
         api_key = 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
-        lat = 54.7224888
-        lon = 30.457209
         params = {
-            "ll": f"{lon},{lat}",
+            "ll": f"{self.lon},{self.lat}",
             "z": str(self.z),
             "apikey": api_key
         }
@@ -68,12 +69,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.label_for_map.setPixmap(pixmap)
 
     def keyPressEvent(self, event):
+        step = 0.0005 * (21 - self.z + 1)
+
         if event.key() == Qt.Key.Key_PageUp and self.z < 21:
             self.z += self.z_dif
-            self.get_image()
         elif event.key() == Qt.Key.Key_PageDown and self.z > 1:
             self.z -= self.z_dif
-            self.get_image()
+        elif event.key() == Qt.Key.Key_Left:
+            self.lon -= step
+        elif event.key() == Qt.Key.Key_Right:
+            self.lon += step
+        elif event.key() == Qt.Key.Key_Up:
+            self.lat += step
+        elif event.key() == Qt.Key.Key_Down:
+            self.lat -= step
+
+        self.get_image()
 
 
 if __name__ == "__main__":
