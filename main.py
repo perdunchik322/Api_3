@@ -46,6 +46,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.get_image()
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
+
         self.layout = QVBoxLayout(central_widget)
         self.layout.addWidget(self.label_for_map)
 
@@ -67,10 +68,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.label_for_map.setPixmap(pixmap)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key.Key_PageUpUp and self.z < 21:
+        if event.key() == Qt.Key.Key_PageUp and self.z < 21:
             self.z += self.z_dif
             self.get_image()
-        elif event.key() == Qt.Key.Key_PageDown and self.z > 0:
+        elif event.key() == Qt.Key.Key_PageDown and self.z > 1:
             self.z -= self.z_dif
             self.get_image()
 
