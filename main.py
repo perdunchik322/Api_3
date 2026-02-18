@@ -11,15 +11,22 @@ MAP_FILE = "map.png"
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(800, 600)
+        MainWindow.resize(1064, 707)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.label_for_map = QtWidgets.QLabel(parent=self.centralwidget)
-        self.label_for_map.setGeometry(QtCore.QRect(0, 0, 800, 600))
+        self.label_for_map.setGeometry(QtCore.QRect(0, 0, 66, 18))
         self.label_for_map.setObjectName("label_for_map")
+        self.search_line = QtWidgets.QLineEdit(parent=self.centralwidget)
+        self.search_line.setGeometry(QtCore.QRect(940, 10, 113, 26))
+        self.search_line.setText("")
+        self.search_line.setObjectName("search_line")
+        self.searchbutton = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.searchbutton.setGeometry(QtCore.QRect(950, 50, 88, 26))
+        self.searchbutton.setObjectName("searchbutton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1064, 23))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
@@ -32,6 +39,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label_for_map.setText(_translate("MainWindow", "TextLabel"))
+        self.searchbutton.setText(_translate("MainWindow", "Искать"))
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -47,12 +56,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setup()
 
     def setup(self):
+        self.label_for_map.setGeometry(0, 40, 800, 600)
+        self.searchbutton.clicked.connect(
+            lambda: self.find_place(self.search_line.text())
+        )
         self.get_image()
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-
-        self.layout = QVBoxLayout(central_widget)
-        self.layout.addWidget(self.label_for_map)
 
     def get_image(self):
         api_key = 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
@@ -64,11 +72,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         }
         server_address = 'https://static-maps.yandex.ru/v1?'
         response = requests.get(server_address, params=params)
+
         with open('map.png', "wb") as file:
             file.write(response.content)
 
         pixmap = QPixmap('map.png')
         self.label_for_map.setPixmap(pixmap)
+        self.label_for_map.resize(pixmap.width(), pixmap.height())
+
+    def find_place(self, toponym_to_find):
+        geocoder_api_server = "https://geocode-maps.yandex.ru/1.x/"
+        geocoder_params = {
+            "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+            "geocode": toponym_to_find,
+            "format": "json"
+        }
+        response = requests.get(geocoder_api_server, params=geocoder_params)
+        json_response = response.json()
+        toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+        lon, lat = toponym["Point"]["pos"].split()
+        self.lon = float(lon)
+        self.lat = float(lat)
+        self.get_image()
 
     def keyPressEvent(self, event):
         step = 0.0005 * (21 - self.z + 1)
