@@ -53,6 +53,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lon = 30.457209
         self.theme = 'dark'
         self.change_coord = 0.0001 * self.z
+        self.point = None
         self.setup()
 
     def setup(self):
@@ -70,6 +71,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             "apikey": api_key,
             "theme": self.theme
         }
+
+        if self.point:
+            params["pt"] = self.point
+
         server_address = 'https://static-maps.yandex.ru/v1?'
         response = requests.get(server_address, params=params)
 
@@ -93,6 +98,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         lon, lat = toponym["Point"]["pos"].split()
         self.lon = float(lon)
         self.lat = float(lat)
+        self.point = f"{self.lon},{self.lat},pm2rdm"
         self.get_image()
 
     def keyPressEvent(self, event):
